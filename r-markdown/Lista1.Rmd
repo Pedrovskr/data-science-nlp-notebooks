@@ -1,0 +1,182 @@
+---
+title: "Lista 1"
+author: "Pedro Cunha"
+date: "2023-08-20"
+output: 
+  html_document:
+    number_sections: no
+    highlight: tango
+    theme: cerulean
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smmoth_scroll: no
+  pdf_document:
+    toc: yes
+---
+
+
+
+```{r}
+if(!require(utf8)) install.packages("utf8") 
+
+library(utf8)
+Sys.setlocale("LC_ALL", "pt_br.utf-8") 
+```
+
+```{r}
+if(!require(tidyverse)) install.packages("tidyverse")
+if(!require(palmerpenguins)) install.packages("palmerpenguins")
+if(!require(ggthemes)) install.packages("ggthemes")
+```
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(palmerpenguins)
+```
+
+# Exercício 1
+##Reproduzir os exemplos do enunciado do livro
+```{r}
+ggplot(data = penguins)
+ 
+ ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+)
+
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point()
+#> Warning: Removed 2 rows containing missing values (`geom_point()`).
+
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)
+) +
+  geom_point()
+  
+  ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species)
+) +
+  geom_point() +
+  geom_smooth(method = "lm")
+  
+  ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point(mapping = aes(color = species)) +
+  geom_smooth(method = "lm")
+  
+  ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point(mapping = aes(color = species, shape = species)) +
+  geom_smooth(method = "lm")
+  
+  ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point(aes(color = species, shape = species)) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Body mass and flipper length",
+    subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+    x = "Flipper length (mm)", y = "Body mass (g)",
+    color = "Species", shape = "Species"
+  ) +
+  scale_color_colorblind()
+```
+ 
+
+# Exercício 2
+ 
+## Questão 1
+```{r}
+Num_rows <- nrow(penguins)  
+Num_cols <- ncol(penguins)
+print(paste("numero de linhas", Num_rows))
+```
+
+## Questão 2 
+```{r}
+#?penguins
+
+### Descreve o tamanho do bico em milimetros
+```
+
+## Questão 3 
+```{r}
+ggplot(
+  data = penguins,
+  mapping = aes(x = bill_length_mm, y = bill_depth_mm)
+) +
+  geom_point(mapping = aes(color = species, shape = species)) +
+  geom_smooth(method = "lm")
+
+### As variaveis se relacionam de forma correlacional
+```
+
+## Questão 4
+```{r}
+ggplot(
+  data = penguins,
+  mapping = aes(x = bill_depth_mm, y = species)
+) +
+  geom_point(mapping = aes(color = species, shape = species)) +
+  geom_smooth(method = "lm")
+
+#Os pontos se alinham, de forma que fica impossivel inferir sobre os dados.Geom_boxplot pode ser uma opção melhor.
+
+ggplot(
+  data = penguins,
+  mapping = aes(x = bill_depth_mm, y = species)
+) +
+  geom_boxplot(mapping = aes(color = species, shape = species)) +
+  geom_smooth(method = "lm")
+```
+
+## Questão 5
+###Está dando erro pela ausência de variaveis. Eu adicionaria variaveis para gerar o eixo X e o eixo Y.
+
+
+# Exercicio 3
+```{r}
+library(gt)
+data("anscombe")
+gt(anscombe, rownames_to_stub = TRUE) %>%
+  tab_header(title = "Quarteto de Anscombe")
+
+library(ggplot2)
+anscombe %>%
+  ggplot() +
+  geom_point(data = anscombe, aes(x = x1, y = y1)) +
+  geom_smooth(data = anscombe, aes(x = x1, y = y1), method = "lm", color = "Red", se = FALSE) +
+  ggtitle("Conjunto 1")
+
+ggplot() +
+  geom_point(data = anscombe, aes(x = x2, y = y2)) +
+  geom_smooth(data = anscombe, aes(x = x2, y = y2), method = "lm", color = "Red", se = FALSE) +
+  ggtitle("Conjunto 2")
+
+ggplot() +
+  geom_point(data = anscombe, aes(x = x3, y = y3)) +
+  geom_smooth(data = anscombe, aes(x = x3, y = y3), method = "lm", color = "Red", se = FALSE) +
+  ggtitle("Conjunto 3")
+
+ggplot() +
+  geom_point(data = anscombe, aes(x = x4, y = y4)) +
+  geom_smooth(data = anscombe, aes(x = x4, y = y4), method = "lm", color = "Red", se = FALSE) +
+  ggtitle("Conjunto 4")
+```
+
+
+
+

@@ -1,0 +1,284 @@
+---
+title: "Lista_2"
+author: "Artur Grochau"
+output: 
+  pdf_document:
+    toc: yes
+  html_document:
+    number_sections: no
+    highlight: tango
+    theme: cerulean
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: no
+---
+
+Código para aceitar caractere especiais
+```{r}
+if(!require(utf8)) install.packages("utf8") 
+
+library(utf8)
+Sys.setlocale("LC_ALL", "pt_br.utf-8") 
+```
+
+Bibliotecas necessárioas
+```{r}
+if (!requireNamespace("tidyverse", quietly = TRUE)) { 
+  install.packages("tidyverse")
+}
+if (!requireNamespace("nycflights13", quietly = TRUE)) {
+  install.packages("nycflights13")
+}
+
+library(tidyverse)# carregando o pacote tidyverse
+
+
+```
+obs: 'quietly = TRUE' retorta 'TRUE' se o pacote existe, e 'FALSE' caso contrario, sem printar mensagens para o console.
+
+
+# 3.5 EXERCÍCIO 2
+```{r}
+library(tidyverse)
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+# 3.5 EXERCÍCIO 4
+A função ggsave() salva o plot dentro da variável "my_bar_plot".
+
+resp:
+ggsave(filename = "mpg-plot.png", plot = my_bar_plot)
+
+
+
+# 4.2.5 EXERCÍCIO 1
+Delay de duas ou mais horas:
+```{r}
+library(nycflights13)
+library(tidyverse)
+flights %>% 
+  filter(arr_delay >= 120)
+```
+
+Voou para Houston:
+```{r}
+flights %>%
+  filter(dest %in% c("IAH", "HOU"))
+```
+
+Operado por United/American/Delta
+```{r}
+flights %>%
+  filter(carrier %in% c("UA", "AA", "DL"))
+```
+
+Departou em verão
+```{r}
+flights %>%
+  filter(month %in% c(7,8,9))
+```
+
+Chegou mais de duas horas atrasado, porém não saiu atrasado
+```{r}
+flights %>%
+  filter(month %in% c(7,8,9))
+```
+
+Atrasou por pelo menos uma hora, mas voou por mais de 30 minutos
+```{r}
+flights %>%
+  filter(dep_delay <= 60, arr_delay < (dep_delay - 30))
+```
+
+Organizando voos para achar os que tem o maior delay de decolagem
+```{r}
+flights %>%
+  arrange(desc(dep_delay))
+```
+
+# 4.2.5 EXERCÍCIO 2
+
+Acha os voos que sairam mais cedo de manhã
+```{r}
+flights %>%
+  arrange(dep_time)
+```
+
+# 4.2.5 EXERCÍCIO 3
+
+Organiza os voos para achar os mais rapidos
+```{r}
+flights %>%
+  mutate(speed = distance / air_time) %>%
+  arrange(desc(speed))
+```
+
+
+# 4.3.5 EXERCÍCIO 2
+Há diversas maneiras de selecionar colunas específicas de um data frame com o pacote 'dplyr' (que faz parte do tidyverse).
+Algumas opções:
+
+  Utilizando o select()
+    Utilizando CSV (Comma Separated Values)
+```{r}
+flights %>% select(dep_time, dep_delay, arr_time, arr_delay)
+```
+    c() para especificar nomes de colunas:
+```{r}
+flights %>% select(c("dep_time", "dep_delay", "arr_time", "arr_delay"))
+```
+
+  Utilizando funções helper
+    Utilizando funções starts_with() para ver se a coluna comeca com certas letras
+```{r}
+flights %>% select(starts_with('dep'), starts_with('arr'))
+```
+
+Tambem pode-se fazer com ends_with(), e com a função 'matches()' para fazer o matching de regex...
+```{r}
+flights %>% select(matches("dep_.*|arr_.*"))
+```
+
+Tem diversos outros modos de selecionar colunas específicas de um df, como através do R padrão..
+```{r}
+flights[, c("dep_time", "dep_delay", "arr_time", "arr_delay")]
+```
+entre outros...
+
+
+# 4.4 REPRODUZINDO A SEÇÃO
+
+Exemplo sem Pipe
+```{r}
+arrange(
+  select(
+    mutate(
+      filter(
+        flights, 
+        dest == "IAH"
+      ),
+      speed = distance / air_time * 60
+    ),
+    year:day, dep_time, carrier, flight, speed
+  ),
+  desc(speed)
+)
+```
+
+Objetos Intermediarios
+```{r}
+flights1 <- filter(flights, dest == "IAH")
+flights2 <- mutate(flights1, speed = distance / air_time * 60)
+flights3 <- select(flights2, year:day, dep_time, carrier, flight, speed)
+arrange(flights3, desc(speed))
+```
+
+Exemplos com Pipe
+```{r}
+flights |> 
+  filter(dest == "IAH") |> 
+  mutate(speed = distance / air_time * 60) |> 
+  select(year:day, dep_time, carrier, flight, speed) |> 
+  arrange(desc(speed))
+```
+Tambem pode-se utilizar o pipe '%>%' do 'magrittr', no lugar do '!>' (faz parte da biblioteca tidyverse)
+
+
+# 4.5.7 EXERCÍCIO 2
+Podemos utilizar funções (ou verbos neste caso), do pacote 'dplyr' para achar os voos que foram os mais adiados de cada destinação
+```{r}
+flights |> # O pipe vai passar este conjunto de dados para a próxima função
+  group_by(dest) |> # Função 'group_by' agrupa o conjunto de dados pelos valores da coluna 'dest' (destino)
+  arrange(desc(dep_delay)) |> # 'arrange' organiza as linhas dentro de cada grupo. Estamos organizando as linhas de forma decrescente com base na coluna 'dep_delay', para que cada grupo (destino) o voo mais atrasado ficara em primeiro lugar.
+  slice_head(n = 1) # seleciona o primeiro registro de cada grupo
+```
+
+# 4.5.7 EXERCÍCIO 6
+```{r}
+df <- tibble(
+  x = 1:5,
+  y = c("a", "b", "a", "a", "b"),
+  z = c("K", "K", "L", "L", "K")
+)
+```
+a, 'Group_by(y)' divide a data dentro de dois grupos, um onde y = "a", outro onde y= "b"
+```{r}
+df |>
+  group_by(y)
+```
+b. 'arrange(y) organiza as rows de df baseada nos valores da coluna 'y'
+```{r}
+df |>
+  arrange(y)
+```
+neste exemplo todas as linhas com y = "a" vão vir primeiro, em seguida com as linhas com y = "b"
+
+c. funções 'group_by(y)' e 'summarize(mean_x = mean(x)) estão agrupando as linhas do df baseado nos valores da coluna 'y'. O summarize(mean_x = mean(x)) esta operando nos grupos, calculando a média dos valores x para cada cgrupo e resumindo a informação dentre de um novo data frame.
+```{r}
+df |>
+  group_by(y) |>
+  summarize(mean_x = mean(x))
+```
+
+d. Agrupando o dado por 'y', depois por 'z' antes de resumir a média de 'x' para cada subgrupo
+```{r}
+df |>
+  group_by(y, z) |>
+  summarize(mean_x = mean(x))
+```
+
+e. O output será igual ao último, porém não haverá o agrupamento dos metadados devido ao .groups = "drop)"
+```{r}
+df |>
+  group_by(y, z) |>
+  summarize(mean_x = mean(x), .groups = "drop")
+```
+
+f. O output da a média de 'x' para cada subgrupo (y e z). Os dados serão convertidos em uma linha por grupo.
+ja no segundo exemplo o 'mutate' adiciona uma nova coluna chamada 'mean_x' que contém a média de 'x' para cada grupo, porém retem todas as linhas originais.
+```{r}
+df |>
+  group_by(y, z) |>
+  summarize(mean_x = mean(x))
+
+df |>
+  group_by(y, z) |>
+  mutate(mean_x = mean(x))
+```
+
+# 5.6 EXERCICIO 1
+```{r}
+flights |> 
+  filter(dest == "IAH") |> 
+  group_by(year, month, day) |> 
+  summarize(
+    n = n(),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) |> 
+  filter(n > 10)
+```
+
+```{r}
+flights |> 
+  filter(
+    carrier == "UA",
+    dest %in% c("IAH", "HOU"),
+    sched_dep_time > 0900,
+    sched_arr_time < 2000
+  ) |> 
+  group_by(flight) |> 
+  summarize(
+    delay = mean(arr_delay, na.rm = TRUE),
+    cancelled = sum(is.na(arr_delay)),
+    n = n()
+  ) |> 
+  filter(n > 10)
+```
+
+
+
+
